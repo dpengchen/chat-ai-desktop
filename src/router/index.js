@@ -1,19 +1,28 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import TYService from '@/views/chats/TYService.vue'
+import DeepService from '@/views/chats/DeepService.vue'
+import KimiService from '@/views/chats/KimiService.vue'
 
 const routes = [
   {
     path: '/',
     name: 'home',
-    component: HomeView
-  },
-  {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
+    component: HomeView,
+    children: [{
+      path: 'deep',
+      default: true,
+      name: 'deepSeek',
+      component: DeepService
+    }, {
+      path: 'ty',
+      name: '通义千问',
+      component: TYService
+    }, {
+      path: 'kimi',
+      name: 'Kimi',
+      component: KimiService
+    }]
   }
 ]
 
