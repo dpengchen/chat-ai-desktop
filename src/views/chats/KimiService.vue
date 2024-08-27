@@ -12,6 +12,7 @@ import VditorPreviewComponent from '@/components/VditorPreviewComponent.vue'
 const store = useStore()
 //聊天信息
 const chats = ref(store.state.kimiChats)
+const regex = /\[\^(\d+)\^\]/g
 
 //发送询问问题
 const sendQuestion = () => {
@@ -26,9 +27,13 @@ const sendQuestion = () => {
         if (!data.choices) {
           return
         }
-        chats.value.messages[chats.value.messages.length - 1].content += data.choices[0].delta.content
+        const content = data.choices[0].delta.content
+        if (content) {
+          chats.value.messages[chats.value.messages.length - 1].content += content
+        }
         return
       }
+      chats.value.messages[chats.value.messages.length - 1].content = chats.value.messages[chats.value.messages.length - 1].content.replaceAll(regex, '')
       ctrl.abort()
       over.value = false
     }, settings.form.requestModel)
@@ -40,7 +45,7 @@ const sendQuestion = () => {
   requestHandle(store, settings.form, chats.value, question.value, settings.form.requestModel).then((response) => {
     const data = response.data
     chats.value['conversation_id'] = data.id
-    chats.value.messages[chats.value.messages.length - 1].content = data.choices[0].message.content
+    chats.value.messages[chats.value.messages.length - 1].content = data.choices[0].message.content.replaceAll(regex, '')
     over.value = false
     question.value = ''
   }).catch(() => {
@@ -61,7 +66,6 @@ const settings = reactive({
     if (errors) {
       return
     }
-    chats.value.stream = settings.form.stream
     store.commit('updateKimiChat', chats.value)
     store.commit('updateConfigsKimi', values)
     Message.success('提交成功')
@@ -111,7 +115,7 @@ onMounted(() => {
       <div class="flex-fill overflow-y-scroll ">
         <div v-for="(v,i) in chats.messages" :key="i">
           <div class="d-flex align-items-start justify-content-end ms-5 my-2" v-if="v.role == 'user'">
-            <div class="border rounded">
+            <div class="border rounded overflow-x-hidden">
               <VditorPreviewComponent :markdown="v.content" />
             </div>
             <div class="p-2">
@@ -122,7 +126,7 @@ onMounted(() => {
             <div class="p-2">
               <img :src="kimi" width="35px">
             </div>
-            <div class="border rounded">
+            <div class="border rounded overflow-x-hidden">
               <VditorPreviewComponent :markdown="v.content" />
             </div>
           </div>
@@ -158,7 +162,8 @@ onMounted(() => {
             @submit="settings.submit">
       <a-form-item label="请求模式" field="requestModel" validate-trigger="blur"
                    hide-asterisk
-                   :rules="[{required:true,message:'请求模式不能为空'}]">
+                   :rules="[{required:true,message:'请求模式不能为空'}]"
+      >
         <a-select :default-value="true" v-model="settings.form.requestModel">
           <a-option value="api">API（api Token必填）</a-option>
           <a-option value="proxy">代理（身份验证必填）</a-option>
@@ -166,7 +171,7 @@ onMounted(() => {
       </a-form-item>
       <a-form-item label="响应模式" field="stream" validate-trigger="blur"
                    hide-asterisk
-                   :rules="[{required:true,message:'响应模式不能为空'}]">
+      >
         <a-select :default-value="true" v-model="chats.stream">
           <a-option :value="true">流模式</a-option>
           <a-option :value="false">回复模式</a-option>

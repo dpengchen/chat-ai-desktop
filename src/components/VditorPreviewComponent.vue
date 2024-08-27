@@ -11,11 +11,9 @@ const props = defineProps({
 })
 
 const previewRef = ref()
-const regex = /\[\^(\d+)\^\]/g
 //页面挂载之后
 onMounted(() => {
-  const value = props.markdown.replace(regex, '')
-  Vditor.preview(previewRef.value, value, {
+  Vditor.preview(previewRef.value, props.markdown, {
     theme: { current: 'light' },
     hljs: {
       style: 'github-dark',
@@ -24,8 +22,12 @@ onMounted(() => {
   })
 })
 
+//复制文本内容
+const copy = () => {
+  navigator.clipboard.writeText(props.markdown)
+}
+
 watch(() => props.markdown, (value) => {
-  value = value.replace(regex, '')
   Vditor.preview(previewRef.value, value, {
     theme: { current: 'light' },
     hljs: {
@@ -38,7 +40,12 @@ watch(() => props.markdown, (value) => {
 </script>
 
 <template>
-  <div class="p-3">
+  <div class="p-3 position-relative">
+    <a-button class="position-absolute end-0 top-0" type="text" shape="round" @click="copy">
+      <template #icon>
+        <IconCopy />
+      </template>
+    </a-button>
     <div ref="previewRef" class="font-size"></div>
   </div>
 </template>

@@ -58,7 +58,6 @@ const settings = reactive({
     if (errors) {
       return
     }
-    chats.value.stream = settings.form.stream
     store.commit('updateTYChat', chats.value)
     store.commit('updateConfigsTy', values)
     store.state.configs.ty = values
@@ -115,7 +114,7 @@ onMounted(() => {
       <div class="flex-fill overflow-y-scroll ">
         <div v-for="(v,i) in chats.messages" :key="i">
           <div class="d-flex align-items-start justify-content-end ms-5 my-2" v-if="v.role == 'user'">
-            <div class="border rounded">
+            <div class="border rounded overflow-x-hidden">
               <VditorPreviewComponent :markdown="v.content" />
             </div>
             <div class="p-2">
@@ -126,7 +125,7 @@ onMounted(() => {
             <div class="p-2">
               <img :src="ty" width="35px">
             </div>
-            <div class="border rounded ">
+            <div class="border rounded  overflow-x-hidden">
               <VditorPreviewComponent :markdown="v.content" />
             </div>
           </div>
@@ -170,7 +169,7 @@ onMounted(() => {
       </a-form-item>
       <a-form-item label="响应模式" field="stream" validate-trigger="blur"
                    hide-asterisk
-                   :rules="[{required:true,message:'响应模式不能为空'}]">
+      >
         <a-select :default-value="true" v-model="chats.stream">
           <a-option :value="true">流模式</a-option>
           <a-option :value="false">回复模式</a-option>
